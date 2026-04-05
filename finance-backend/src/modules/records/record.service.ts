@@ -3,11 +3,20 @@ import { FinancialRecord, FinancialRecordDTO, PaginatedResult } from "../../type
 import { toCents, fromCents } from "../../utils/response";
 import { CreateRecordInput, UpdateRecordInput, RecordFilterInput } from "./record.schema";
 
-function toDTO(row: FinancialRecord): FinancialRecordDTO {
-  const { deleted_at, amount, ...rest } = row;
-  return { ...rest, amount: fromCents(amount) };
-}
 
+function toDTO(row: FinancialRecord): FinancialRecordDTO {
+  return {
+    id:         row.id,
+    user_id:    row.user_id,
+    amount:     fromCents(row.amount),
+    type:       row.type,
+    category:   row.category,
+    date:       row.date,
+    notes:      row.notes,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
 
 export function getRecords(
   filters: RecordFilterInput,
@@ -43,14 +52,13 @@ export function getRecords(
 
   const where = conditions.join(" AND ");
 
-  // Total count for pagination
   const { total } = db
     .prepare(`SELECT COUNT(*) AS total FROM financial_records WHERE ${where}`)
     .get(...params) as { total: number };
 
-  const page = filters.page ?? 1;
+  const page     = filters.page ?? 1;
   const pageSize = filters.page_size ?? 20;
-  const offset = (page - 1) * pageSize;
+  const offset   = (page - 1) * pageSize;
 
   const rows = db
     .prepare(
@@ -104,10 +112,10 @@ export function updateRecord(
   const values: unknown[] = [];
 
   if (input.amount   !== undefined) { fields.push("amount = ?");   values.push(toCents(input.amount)); }
-  if (input.type     !== undefined) { fields.push("type = ?");     values.push(input.type);   }
-  if (input.category !== undefined) { fields.push("category = ?"); values.push(input.category); }
-  if (input.date     !== undefined) { fields.push("date = ?");     values.push(input.date);   }
-  if (input.notes    !== undefined) { fields.push("notes = ?");    values.push(input.notes);  }
+  if (input.type     !== undefined) { fields.push("type = ?");     values.push(input.type);            }
+  if (input.category !== undefined) { fields.push("category = ?"); values.push(input.category);        }
+  if (input.date     !== undefined) { fields.push("date = ?");     values.push(input.date);            }
+  if (input.notes    !== undefined) { fields.push("notes = ?");    values.push(input.notes);           }
 
   if (fields.length === 0) return existing;
 
