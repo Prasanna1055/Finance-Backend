@@ -15,9 +15,19 @@ interface RawMonthRow {
 }
 
 function toDTO(row: FinancialRecord): FinancialRecordDTO {
-  const { deleted_at, amount, ...rest } = row;
-  return { ...rest, amount: fromCents(amount) };
+  return {
+    id:         row.id,
+    user_id:    row.user_id,
+    amount:     fromCents(row.amount),
+    type:       row.type,
+    category:   row.category,
+    date:       row.date,
+    notes:      row.notes,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
 }
+
 
 export function getTotals(): { total_income: number; total_expenses: number; net_balance: number } {
   const rows = db
@@ -57,8 +67,8 @@ export function getCategoryTotals(): CategoryTotal[] {
 
   return rows.map((r) => ({
     category: r.category,
-    type: r.type,
-    total: fromCents(r.total),
+    type:     r.type,
+    total:    fromCents(r.total),
   }));
 }
 
@@ -98,17 +108,13 @@ export function getRecentActivity(limit = 10): FinancialRecordDTO[] {
   return rows.map(toDTO);
 }
 
-export function getDashboardSummary(): DashboardSummary {
-  const totals          = getTotals();
-  const category_totals = getCategoryTotals();
-  const monthly_trends  = getMonthlyTrends(12);
-  const recent_activity = getRecentActivity(10);
 
+export function getDashboardSummary(): DashboardSummary {
   return {
-    ...totals,
-    category_totals,
-    monthly_trends,
-    recent_activity,
+    ...getTotals(),
+    category_totals: getCategoryTotals(),
+    monthly_trends:  getMonthlyTrends(12),
+    recent_activity: getRecentActivity(10),
   };
 }
 
@@ -129,6 +135,7 @@ export function getTotalsByRange(
 
   let income  = 0;
   let expense = 0;
+
   for (const r of rows) {
     if (r.type === "income")  income  = r.total;
     if (r.type === "expense") expense = r.total;
