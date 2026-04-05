@@ -1,4 +1,3 @@
-
 export type Role = "admin" | "analyst" | "viewer";
 export type UserStatus = "active" | "inactive";
 
@@ -12,6 +11,7 @@ export interface User {
   created_at: string;
   updated_at: string;
 }
+
 export type SafeUser = Omit<User, "password_hash">;
 
 export interface AuthPayload {
@@ -26,6 +26,7 @@ export type RecordType = "income" | "expense";
 export interface FinancialRecord {
   id: number;
   user_id: number;
+  amount: number;           
   type: RecordType;
   category: string;
   date: string;            
@@ -35,10 +36,18 @@ export interface FinancialRecord {
   updated_at: string;
 }
 
-// Shape returned to callers – amount converted to decimal for readability 
-export type FinancialRecordDTO = Omit<FinancialRecord, "deleted_at"> & {
-  amount: number; // in dollars/units (decimal)
-};
+export interface FinancialRecordDTO {
+  id: number;
+  user_id: number;
+  amount: number;   
+  type: RecordType;
+  category: string;
+  date: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 
 export interface CategoryTotal {
   category: string;
@@ -72,6 +81,7 @@ export interface PaginatedResult<T> {
     total_pages: number;
   };
 }
+
 
 export interface RecordFilters {
   type?: RecordType;
