@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/app.js",
+    "start": "npm run build && node dist/app.js",
     "dev": "ts-node src/app.ts",
     "seed": "ts-node src/config/seed.ts",
     "test": "jest --forceExit --detectOpenHandles"
